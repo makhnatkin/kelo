@@ -328,14 +328,15 @@ textarea {
 .viewer_blocker {
     overflow: hidden;
 }
+
+/* photoViewer.js */
 .viewer {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
-    z-index: 100;
-    width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    width: 100%;
+    background: rgba(0,0,0,.85);
     display: none;
 }
     .viewer__loader {
@@ -345,15 +346,33 @@ textarea {
         position: absolute;
         left: 50%;
         top: 50%;
-        margin-top: -32px;
+        margin-top: -16px;
         margin-left: -16px;
         z-index: 101;        
     }
-    .viewer__image {
-        position: relative;
-        z-index: 102;
-        display: block;
-        max-width: 90%;
-        max-height: 100%; 
-        margin: 0 auto;
-    }    
+
+    .viewer__outer {
+        text-align: center;
+        height: 100%;
+    }
+    .viewer__outer:before {
+      content: '';
+      display: inline-block;
+      height: 100%;
+      vertical-align: middle;
+    }
+        .viewer__inner {
+            position: relative;
+            z-index: 102;
+            display: inline-block;
+            vertical-align: middle;
+            max-width: 90%;
+            max-height: 90%;
+        }
+            .viewer__image {
+                max-height: 100%;
+                max-width: 100%;
+                display: block;
+                cursor: pointer;
+            }
+

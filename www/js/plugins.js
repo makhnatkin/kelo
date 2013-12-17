@@ -131,23 +131,59 @@ function createjQueryPlugin(Class, name) {
 			this._createImagesUrls();
 			this._preloadImages();
 			this._createModal();
-			this.showModal();
 			self.currentImage = 0;
-			this.appendImage(self.currentImage);
-			self.$modal.on('click', function() {
+
+			this.$gallery.on('click', '.gallery__preview-image', function(event) {
+				event.preventDefault();
+				self.show(event);
+			});
+
+			$(document).on('keyup', function(event) {
+				if (event.keyCode === 27) {
+					self.$modal.fadeOut('fast');
+				}
+			});
+		}
+
+
+		PhotoViewer.prototype.slide = function(event) {
+			var self = this;
+
+			if (event.target.nodeName.toLowerCase() === 'img') {
 				self.currentImage++;
 				if (self.currentImage == self.fullImagesUrls.length) {
 					self.currentImage = 0;
 				}
 				self.nextImage(self.currentImage);
-			});
+			} else {
+				self.$modal.fadeOut('fast');
+			}
+		}
+
+
+		PhotoViewer.prototype.setCurrentImage = function(event) {
+			var 
+				src,
+				self = this;
+
+			src = $(event.target).attr('src');
+			self.currentImage = self.fullImagesUrls.indexOf(src);
+		}
+
+
+		PhotoViewer.prototype.show = function(event) {
+			var self = this;
+
+			self.setCurrentImage(event);
+			self.appendImage(self.currentImage);
+			self.showModal();
 		}
 
 
 		PhotoViewer.prototype._createImagesUrls = function() {
-			self = this;
+			var self = this;
+			
 			self.fullImagesUrls = [];
-			console.log(self.$gallery);
 			self.$gallery.find(self.options.selectors.link).each(function() {
 				self.fullImagesUrls.push($(this).attr('href'));
 			});
@@ -155,7 +191,8 @@ function createjQueryPlugin(Class, name) {
 
 
 		PhotoViewer.prototype._preloadImages = function() {
-			self = this;
+			var self = this;
+			
 			$(window).load(function() {
 				$(self.fullImagesUrls).each(function() {
        				$('<img/>')[0].src = this;
@@ -163,24 +200,29 @@ function createjQueryPlugin(Class, name) {
 			});			
 		}
 
-
 		/*
 		# Инициализация фоторамы
 		*/
 		PhotoViewer.prototype._createModal = function() {
 			var 
 				$body,
-				$modalBackground,
-				$ajaxLoader,
+				$modal,
+				modalTemplate,
 				self;
 	
 			self = this;
-			$body = $(document.body)
-			$ajaxLoader = $('<div>').addClass('viewer__loader');
-			$modalBackground = $('<div>').addClass('viewer');
-			$modalBackground.append($ajaxLoader);
-			$body.addClass('viewer_blocker').append($modalBackground);
-			return self.$modal = $modalBackground;
+			$body = $(document.body);
+			modalTemplate = $('#photo-viewer').html();
+			$body.append(modalTemplate);
+
+			self.$modal = $('.viewer', $body);
+			self.$container = $('.viewer__inner', self.$modal);
+
+			/* bind events */
+			self.$modal.on('click', function(event) {
+				self.slide(event);
+			});
+
 		};
 
 		/*
@@ -198,17 +240,12 @@ function createjQueryPlugin(Class, name) {
 		*/
 		PhotoViewer.prototype.appendImage = function(imageNumber) {
 			var 
-				$imageWrapper,
 				$currentImage,
 				self;
 	
 			self = this;
-			$imageWrapper = $('<div>').addClass('viewer__wrapper');
-			$currentImage = $('<img>')
-				.addClass('viewer__image')
+			$currentImage = $('.viewer__image', self.$container)
 				.attr('src', self.fullImagesUrls[imageNumber]);
-			$imageWrapper.append($currentImage);
-			self.$modal.append($imageWrapper);
 		};
 
 		/*
